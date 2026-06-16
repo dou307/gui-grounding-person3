@@ -49,8 +49,11 @@ def resolve_image_path(image, input_path, image_root=None):
         candidates.extend(
             [
                 Path(project_root) / image,
+                Path(project_root) / "person3" / image,
                 Path(project_root) / "data" / "images" / image,
                 Path(project_root) / "data" / "splits" / image,
+                Path(project_root) / "person3" / "data" / "images" / image,
+                Path(project_root) / "person3" / "data" / "splits" / image,
             ]
         )
 
@@ -107,6 +110,11 @@ class QwenGuiDataset(Dataset):
         row = self.rows[index]
         prompt_messages, full_messages = qwen_row_to_messages(row)
         image_path = resolve_image_path(row["image"], self.data_path, self.image_root)
+        if not image_path.exists():
+            raise FileNotFoundError(
+                f"Image not found for sample index={index}, image={row['image']}. "
+                f"Resolved path: {image_path}. Set --image-root or IMAGE_ROOT to the directory containing images."
+            )
         return {
             "id": row.get("id", str(index)),
             "image_path": str(image_path),
@@ -202,6 +210,28 @@ def build_model(args):
     return model
 
 
+def check_images(dataset, limit):
+    missing = []
+    check_count = len(dataset) if limit is None or limit < 0 else min(len(dataset), limit)
+    for idx in range(check_count):
+        row = dataset.rows[idx]
+        image_path = resolve_image_path(row["image"], dataset.data_path, dataset.image_root)
+        if not image_path.exists():
+            missing.append((idx, row["image"], str(image_path)))
+            if len(missing) >= 5:
+                break
+    if missing:
+        lines = [
+            "Training images are missing. Pass the correct image directory with --image-root or IMAGE_ROOT.",
+            "Examples:",
+            "  IMAGE_ROOT=/home/ma-user/work/gui-project/data/images bash scripts/train_p3_direct_lora.sh --limit 8 --max-steps 2",
+            "  bash scripts/train_p3_direct_lora.sh --image-root /home/ma-user/work/gui-project/data/images --limit 8 --max-steps 2",
+            "Missing examples:",
+        ]
+        lines.extend(f"  index={idx}, image={image}, resolved={path}" for idx, image, path in missing)
+        raise FileNotFoundError("\n".join(lines))
+
+
 def train(args):
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     Path(args.logging_dir).mkdir(parents=True, exist_ok=True)
@@ -211,6 +241,7 @@ def train(args):
     dataset = QwenGuiDataset(args.train_file, image_root=args.image_root, limit=args.limit)
     if len(dataset) == 0:
         raise ValueError(f"No training samples loaded from {args.train_file}")
+    check_images(dataset, args.check_image_limit)
 
     training_args = TrainingArguments(
         output_dir=args.output_dir,
@@ -253,6 +284,7 @@ def main():
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--logging-dir", required=True)
     parser.add_argument("--image-root")
+    parser.add_argument("--check-image-limit", type=int, default=-1)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--resume-from-checkpoint")
     parser.add_argument("--max-length", type=int, default=2048)
