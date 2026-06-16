@@ -15,4 +15,4 @@ logs/
 .env
 .venv/
 venv/
-
+.requirements-local.txt

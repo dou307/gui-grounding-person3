@@ -50,6 +50,20 @@ bash scripts/install_env.sh
 conda activate qwen3vl
 ```
 
+第一次网络安装完成后，立刻把所有 wheel 包缓存到持久化目录：
+
+```bash
+bash scripts/cache_wheels.sh
+```
+
+以后如果 Notebook 重建或 `qwen3vl` 环境丢失，再运行 `bash scripts/install_env.sh` 时会优先从：
+
+```text
+/home/ma-user/work/gui-project/wheelhouse
+```
+
+本地安装，不需要重新下载几 GB 的 PyTorch/CUDA 依赖。
+
 验证：
 
 ```bash
@@ -246,4 +260,3 @@ python -m src.person3.visualize_cases \
 - 分析模型是否因为多任务输出增加了学习难度。
 
 这两种结果都可以写成有效实验结论。
-

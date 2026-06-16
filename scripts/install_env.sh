@@ -2,6 +2,11 @@
 set -euo pipefail
 
 QWEN_ENV_NAME="${QWEN_ENV_NAME:-qwen3vl}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+PROJECT_ROOT="${PROJECT_ROOT:-$(cd "${REPO_ROOT}/.." && pwd)}"
+WHEELHOUSE="${WHEELHOUSE:-${PROJECT_ROOT}/wheelhouse}"
+LOCAL_REQ="${REPO_ROOT}/.requirements-local.txt"
 
 if ! command -v conda >/dev/null 2>&1; then
   echo "conda is required but not found." >&2
@@ -34,7 +39,26 @@ fi
 python -m pip install --upgrade pip
 
 if [[ -f requirements-lock.txt ]]; then
-  pip install -r requirements-lock.txt
+  python - <<'PY' > "${LOCAL_REQ}"
+from pathlib import Path
+
+for line in Path("requirements-lock.txt").read_text(encoding="utf-8").splitlines():
+    if line.startswith("torch @ "):
+        print("torch==2.6.0+cu118")
+    elif line.startswith("torchvision @ "):
+        print("torchvision==0.21.0+cu118")
+    elif line.strip():
+        print(line)
+PY
+
+  if [[ -d "${WHEELHOUSE}" ]] && compgen -G "${WHEELHOUSE}/*.whl" >/dev/null; then
+    echo "Installing from local wheelhouse: ${WHEELHOUSE}"
+    pip install --no-index --find-links "${WHEELHOUSE}" -r "${LOCAL_REQ}"
+  else
+    echo "Local wheelhouse not found. Installing from network once."
+    echo "After this succeeds, run: bash scripts/cache_wheels.sh"
+    pip install -r requirements-lock.txt
+  fi
 else
   pip install \
     "https://mirrors.aliyun.com/pytorch-wheels/cu118/torch-2.6.0%2Bcu118-cp310-cp310-linux_x86_64.whl" \
