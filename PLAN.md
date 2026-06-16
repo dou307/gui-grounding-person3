@@ -188,9 +188,9 @@ python -m src.person3.build_qwen_data \
 训练脚本使用全组统一的 Qwen3-VL 微调入口。第三成员需要分别训练：
 
 ```text
-P3-1: p3_direct_train.json
-P3-2: p3_region_point_train.json
-P3-3: p3_target_region_point_train.json
+P3-1: p3_direct_train.jsonl
+P3-2: p3_region_point_train.jsonl
+P3-3: p3_target_region_point_train.jsonl
 ```
 
 输出目录：
@@ -217,7 +217,7 @@ $PROJECT_ROOT/checkpoints/person3/p3_target_region_point
 python -m src.person3.infer_qwen3vl \
   --model Qwen/Qwen3-VL-4B-Instruct \
   --adapter $PROJECT_ROOT/checkpoints/person3/p3_region_point \
-  --input $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
+  --input $PROJECT_ROOT/data/splits/D1-Base_val.jsonl \
   --method region_point \
   --output $PROJECT_ROOT/outputs/predictions/person3/p3_region_point_val.jsonl \
   --limit 100
@@ -229,7 +229,7 @@ python -m src.person3.infer_qwen3vl \
 
 ```bash
 python -m src.person3.evaluate \
-  --truth $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
+  --truth $PROJECT_ROOT/data/splits/D1-Base_val.jsonl \
   --pred $PROJECT_ROOT/outputs/predictions/person3/p3_region_point_val.jsonl \
   --out $PROJECT_ROOT/outputs/metrics/person3/p3_region_point_val_metrics.json
 ```
@@ -246,7 +246,7 @@ case images
 
 ```bash
 python -m src.person3.visualize_cases \
-  --truth $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
+  --truth $PROJECT_ROOT/data/splits/D1-Base_val.jsonl \
   --pred $PROJECT_ROOT/outputs/predictions/person3/p3_region_point_val.jsonl \
   --out-dir $PROJECT_ROOT/outputs/cases/person3/p3_region_point \
   --limit 50

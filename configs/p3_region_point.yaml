@@ -7,9 +7,8 @@ output_schema:
   action: click
   x: int_0_1000
   y: int_0_1000
-train_data: "${PROJECT_ROOT}/data/person3/p3_region_point_train.json"
-val_data: "${PROJECT_ROOT}/data/person3/p3_region_point_val.json"
+train_data: "${PROJECT_ROOT}/data/person3/p3_region_point_train.jsonl"
+val_data: "${PROJECT_ROOT}/data/person3/p3_region_point_val.jsonl"
 output_dir: "${PROJECT_ROOT}/checkpoints/person3/p3_region_point"
 prediction_path: "${PROJECT_ROOT}/outputs/predictions/person3/p3_region_point_val.jsonl"
 metrics_path: "${PROJECT_ROOT}/outputs/metrics/person3/p3_region_point_val_metrics.json"
-

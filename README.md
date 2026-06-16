@@ -110,9 +110,9 @@ python -m src.person3.derive_person3_from_qwen \
 训练时分别传入：
 
 ```text
-p3_direct_train.json
-p3_region_point_train.json
-p3_target_region_point_train.json
+p3_direct_train.jsonl
+p3_region_point_train.jsonl
+p3_target_region_point_train.jsonl
 ```
 
 建议输出目录：
@@ -140,7 +140,7 @@ $PROJECT_ROOT/checkpoints/person3/p3_target_region_point
 
 ```bash
 python -m src.person3.evaluate \
-  --truth $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
+  --truth $PROJECT_ROOT/data/splits/D1-Base_val.jsonl \
   --pred $PROJECT_ROOT/outputs/predictions/person3/p3_region_point_val.jsonl \
   --out $PROJECT_ROOT/outputs/metrics/person3/p3_region_point_val_metrics.json
 ```
@@ -158,7 +158,7 @@ python -m src.person3.evaluate \
 
 ```bash
 python -m src.person3.visualize_cases \
-  --truth $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
+  --truth $PROJECT_ROOT/data/splits/D1-Base_val.jsonl \
   --pred $PROJECT_ROOT/outputs/predictions/person3/p3_region_point_val.jsonl \
   --out-dir $PROJECT_ROOT/outputs/cases/person3/p3_region_point \
   --limit 30
