@@ -71,6 +71,9 @@ def normalized_bbox(sample, input_path=None):
     if "bbox_pixel" not in sample:
         raise ValueError(f"Sample {sample.get('id')} has no bbox_1000 or bbox_pixel")
 
+    if "img_w" in sample and "img_h" in sample:
+        return pixel_bbox_to_1000(sample["bbox_pixel"], int(sample["img_w"]), int(sample["img_h"]))
+
     if input_path is None:
         raise ValueError("input_path is required when converting bbox_pixel")
 
@@ -96,8 +99,14 @@ def target_from_instruction(instruction: str) -> str:
     return target or instruction.strip()
 
 
-def enriched_sample(sample, input_path=None):
-    bbox = normalized_bbox(sample, input_path)
+def enriched_sample(sample, input_path=None, point_fallback=False):
+    try:
+        bbox = normalized_bbox(sample, input_path)
+    except (FileNotFoundError, ValueError):
+        if not point_fallback or "point_1000" not in sample:
+            raise
+        x, y = normalized_point(sample, [0, 0, 0, 0])
+        bbox = [x, y, x, y]
     point = normalized_point(sample, bbox)
     instruction = sample["instruction"]
     return {

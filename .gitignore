@@ -10,6 +10,8 @@ outputs/
 checkpoints/
 hf_cache/
 logs/
+*.jsonl
+!examples/*.jsonl
 *.log
 
 .env

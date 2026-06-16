@@ -8,7 +8,7 @@ def build(input_path, output_path, method, limit=None):
     for idx, sample in enumerate(read_jsonl(input_path)):
         if limit is not None and idx >= limit:
             break
-        enriched = enriched_sample(sample, input_path)
+        enriched = enriched_sample(sample, input_path, point_fallback=True)
         rows.append(to_qwen_conversation(enriched, method))
     write_json(output_path, rows)
     print(f"Wrote {len(rows)} samples to {output_path}")
@@ -26,4 +26,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

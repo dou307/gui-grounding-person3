@@ -72,35 +72,36 @@ export PROJECT_ROOT=/home/ma-user/work/gui-project
 
 ## 生成三种训练数据
 
-假设统一训练集为：
+当前 1 号已经提供了公共数据：
 
 ```text
-$PROJECT_ROOT/data/splits/train_base_v1.jsonl
-$PROJECT_ROOT/data/splits/val_base_v1.jsonl
+$PROJECT_ROOT/data/splits/D1-Base_train_qwen.jsonl
+$PROJECT_ROOT/data/splits/D1-Base_val.jsonl
+$PROJECT_ROOT/data/splits/screenspot_eval.jsonl
 ```
 
-生成 Qwen 对话格式：
+其中 `D1-Base_train_qwen.jsonl` 已经是 Direct Point 的 Qwen 对话训练格式。第三成员从该文件派生三种训练格式：
 
 ```bash
 cd /home/ma-user/work/gui-project/person3
 
-python -m src.person3.build_qwen_data \
-  --input $PROJECT_ROOT/data/splits/train_base_v1.jsonl \
-  --output $PROJECT_ROOT/data/person3/p3_direct_train.json \
+python -m src.person3.derive_person3_from_qwen \
+  --input $PROJECT_ROOT/data/splits/D1-Base_train_qwen.jsonl \
+  --output $PROJECT_ROOT/data/person3/p3_direct_train.jsonl \
   --method direct
 
-python -m src.person3.build_qwen_data \
-  --input $PROJECT_ROOT/data/splits/train_base_v1.jsonl \
-  --output $PROJECT_ROOT/data/person3/p3_region_point_train.json \
+python -m src.person3.derive_person3_from_qwen \
+  --input $PROJECT_ROOT/data/splits/D1-Base_train_qwen.jsonl \
+  --output $PROJECT_ROOT/data/person3/p3_region_point_train.jsonl \
   --method region_point
 
-python -m src.person3.build_qwen_data \
-  --input $PROJECT_ROOT/data/splits/train_base_v1.jsonl \
-  --output $PROJECT_ROOT/data/person3/p3_target_region_point_train.json \
+python -m src.person3.derive_person3_from_qwen \
+  --input $PROJECT_ROOT/data/splits/D1-Base_train_qwen.jsonl \
+  --output $PROJECT_ROOT/data/person3/p3_target_region_point_train.jsonl \
   --method target_region_point
 ```
 
-验证集同理生成三个版本。
+验证集 `D1-Base_val.jsonl` 使用 `build_qwen_data.py` 生成三个版本。
 
 ## 训练
 

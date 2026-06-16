@@ -25,6 +25,16 @@
 | D1-Balanced | 86,412 | 按 Small/Medium/Large 目标大小重采样，每类 28,804 条 |
 | D1-Hard | 115,216 | 在 Balanced 基础上，对小目标过采样 2 倍 |
 
+当前已收到并放置的文件：
+
+| 本地文件 | 对应含义 | 状态 |
+|---|---|---|
+| `data/splits/D1-Base_train_qwen.jsonl` | D1-Base 训练集，已是 Direct Point 的 Qwen 对话格式 | 可直接派生 3 号三套训练数据 |
+| `data/splits/D1-Base_val.jsonl` | D1-Base 验证集，统一评测格式 | 可用于验证集推理和评测；若需按 bbox 评测，需要图片文件或补充 `bbox_1000/img_w/img_h` |
+| `data/splits/screenspot_eval.jsonl` | ScreenSpot 最终测试集，统一评测格式 | 可用于最终测试评测 |
+
+注意：`D1-Base_train_qwen.jsonl` 已经不是原始标注，而是 Direct Point Qwen 训练格式。因此 3 号不需要重新转换原始 Widget Captioning 标注，可以直接用 `derive_person3_from_qwen.py` 派生结构化训练集。
+
 ## 1. 第三成员研究问题
 
 研究：
@@ -85,49 +95,52 @@ PY
 
 ## 3. 公共数据准备
 
-### 3.1 转换 Widget Captioning 标注
+### 3.1 使用 1 号已提供的数据
 
-Widget Captioning 数据来自 OS-Atlas-data 仓库。根据 1 号同步的信息，每条样本包含：
+1 号当前已经提供了 `D1-Base_train_qwen.jsonl`，格式如下：
 
 ```json
 {
-  "img_filename": "...png",
-  "instruction": "...",
-  "bbox": [left, top, right, bottom]
+  "image": "10554.jpg",
+  "conversations": [
+    {
+      "from": "human",
+      "value": "<image>\n请根据指令定位需要点击的元素。指令：...。只输出 JSON。"
+    },
+    {
+      "from": "gpt",
+      "value": "{\"action\": \"click\", \"x\": 69, \"y\": 71}"
+    }
+  ]
 }
 ```
 
-其中 bbox 是归一化边界框坐标。具体原始字段名以 1 号导出的标注文件为准；转换脚本已兼容 `img_filename/image/file_name`、`instruction`、`bbox` 这类常见字段。
+该文件已包含图片、指令和 Direct Point 答案，足够派生 3 号三种训练格式。若后续拿到原始 Widget Captioning 标注，再使用 `convert_widget_captioning.py`。
 
-转换命令示例：
+当前文件放置位置：
+
+```text
+$PROJECT_ROOT/person3/data/splits/D1-Base_train_qwen.jsonl
+$PROJECT_ROOT/person3/data/splits/D1-Base_val.jsonl
+$PROJECT_ROOT/person3/data/splits/screenspot_eval.jsonl
+```
+
+建议同步到统一项目目录：
 
 ```bash
-export PROJECT_ROOT=/home/ma-user/work/gui-project
-cd $PROJECT_ROOT/person3
+mkdir -p $PROJECT_ROOT/data/splits
+cp $PROJECT_ROOT/person3/data/splits/D1-Base_train_qwen.jsonl $PROJECT_ROOT/data/splits/
+cp $PROJECT_ROOT/person3/data/splits/D1-Base_val.jsonl $PROJECT_ROOT/data/splits/
+cp $PROJECT_ROOT/person3/data/splits/screenspot_eval.jsonl $PROJECT_ROOT/data/splits/
+```
 
+### 3.2 如果后续拿到原始 Widget Captioning 标注
+
+```bash
 python -m src.person3.convert_widget_captioning \
   --annotations $PROJECT_ROOT/raw/widget_captioning/annotations.json \
   --image-root $PROJECT_ROOT/raw/widget_captioning/images \
   --output $PROJECT_ROOT/data/splits/widget_captioning_all.jsonl
-```
-
-### 3.2 划分训练集和验证集
-
-```bash
-python -m src.person3.split_jsonl \
-  --input $PROJECT_ROOT/data/splits/widget_captioning_all.jsonl \
-  --train-output $PROJECT_ROOT/data/splits/train_base_v1.jsonl \
-  --val-output $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
-  --val-ratio 0.1 \
-  --seed 42
-```
-
-### 3.3 准备 ScreenSpot 测试集
-
-```bash
-python -m src.person3.prepare_screenspot \
-  --output-jsonl $PROJECT_ROOT/data/splits/screenspot_test.jsonl \
-  --image-dir $PROJECT_ROOT/data/screenspot/images
 ```
 
 ## 4. 生成第三成员三套训练数据
@@ -135,37 +148,37 @@ python -m src.person3.prepare_screenspot \
 ```bash
 mkdir -p $PROJECT_ROOT/data/person3
 
-python -m src.person3.build_qwen_data \
-  --input $PROJECT_ROOT/data/splits/train_base_v1.jsonl \
-  --output $PROJECT_ROOT/data/person3/p3_direct_train.json \
+python -m src.person3.derive_person3_from_qwen \
+  --input $PROJECT_ROOT/data/splits/D1-Base_train_qwen.jsonl \
+  --output $PROJECT_ROOT/data/person3/p3_direct_train.jsonl \
   --method direct
 
-python -m src.person3.build_qwen_data \
-  --input $PROJECT_ROOT/data/splits/train_base_v1.jsonl \
-  --output $PROJECT_ROOT/data/person3/p3_region_point_train.json \
+python -m src.person3.derive_person3_from_qwen \
+  --input $PROJECT_ROOT/data/splits/D1-Base_train_qwen.jsonl \
+  --output $PROJECT_ROOT/data/person3/p3_region_point_train.jsonl \
   --method region_point
 
-python -m src.person3.build_qwen_data \
-  --input $PROJECT_ROOT/data/splits/train_base_v1.jsonl \
-  --output $PROJECT_ROOT/data/person3/p3_target_region_point_train.json \
+python -m src.person3.derive_person3_from_qwen \
+  --input $PROJECT_ROOT/data/splits/D1-Base_train_qwen.jsonl \
+  --output $PROJECT_ROOT/data/person3/p3_target_region_point_train.jsonl \
   --method target_region_point
 ```
 
-验证集同理：
+验证集 `D1-Base_val.jsonl` 不是 Qwen 训练对话格式，仍使用 `build_qwen_data.py` 生成验证提示：
 
 ```bash
 python -m src.person3.build_qwen_data \
-  --input $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
+  --input $PROJECT_ROOT/data/splits/D1-Base_val.jsonl \
   --output $PROJECT_ROOT/data/person3/p3_direct_val.json \
   --method direct
 
 python -m src.person3.build_qwen_data \
-  --input $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
+  --input $PROJECT_ROOT/data/splits/D1-Base_val.jsonl \
   --output $PROJECT_ROOT/data/person3/p3_region_point_val.json \
   --method region_point
 
 python -m src.person3.build_qwen_data \
-  --input $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
+  --input $PROJECT_ROOT/data/splits/D1-Base_val.jsonl \
   --output $PROJECT_ROOT/data/person3/p3_target_region_point_val.json \
   --method target_region_point
 ```
