@@ -11,7 +11,7 @@ try:
 except ImportError:
     PeftModel = None
 
-from .schema import prompt_for_method, read_jsonl, resolve_image_path, write_jsonl
+from .schema import prompt_for_method, read_jsonl, resolve_image_path
 
 
 def chunks(items, size):
@@ -95,24 +95,55 @@ def infer_batch(processor, model, samples, input_path, method, args):
     return [{"id": sample_id, "raw_output": raw_output} for sample_id, raw_output in zip(ids, raw_outputs)]
 
 
+def append_jsonl(path, rows):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        for row in rows:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def load_completed_ids(path):
+    path = Path(path)
+    if not path.exists():
+        return set()
+    completed = set()
+    for row in read_jsonl(path):
+        if "id" in row:
+            completed.add(row["id"])
+    return completed
+
+
 def infer(args):
     processor = load_processor(args.model, args.min_pixels, args.max_pixels)
     model = load_model(args.model, args.adapter)
 
-    outputs = []
+    completed_ids = load_completed_ids(args.output) if args.resume else set()
+    if not args.resume:
+        output_path = Path(args.output)
+        if output_path.exists():
+            output_path.unlink()
+
     rows = []
     for idx, sample in enumerate(read_jsonl(args.input)):
         if args.limit is not None and idx >= args.limit:
             break
+        if sample["id"] in completed_ids:
+            continue
         rows.append(sample)
 
-    for batch in chunks(rows, args.batch_size):
-        outputs.extend(infer_batch(processor, model, batch, args.input, args.method, args))
-        if len(outputs) % args.log_every < args.batch_size:
-            print(f"inferred {len(outputs)} samples")
+    written = len(completed_ids)
+    if completed_ids:
+        print(f"resume enabled: skipped {len(completed_ids)} completed samples")
 
-    write_jsonl(args.output, outputs)
-    print(f"Wrote {len(outputs)} predictions to {args.output}")
+    for batch in chunks(rows, args.batch_size):
+        batch_outputs = infer_batch(processor, model, batch, args.input, args.method, args)
+        append_jsonl(args.output, batch_outputs)
+        written += len(batch_outputs)
+        if written % args.log_every < args.batch_size:
+            print(f"inferred {written} samples")
+
+    print(f"Wrote {written} predictions to {args.output}")
 
 
 def main():
@@ -129,6 +160,7 @@ def main():
     parser.add_argument("--max-pixels", type=int, default=401408)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--log-every", type=int, default=20)
+    parser.add_argument("--resume", action="store_true")
     args = parser.parse_args()
     infer(args)
 
