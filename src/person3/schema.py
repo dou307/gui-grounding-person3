@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from pathlib import Path
 
@@ -50,7 +51,17 @@ def resolve_image_path(sample, input_path):
     image = Path(sample["image"])
     if image.is_absolute():
         return image
-    return Path(input_path).parent / image
+    candidates = [
+        Path(input_path).parent / image,
+        Path.cwd() / image,
+    ]
+    project_root = os.environ.get("PROJECT_ROOT")
+    if project_root:
+        candidates.append(Path(project_root) / image)
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
 
 
 def normalized_bbox(sample, input_path=None):
@@ -199,4 +210,3 @@ def parse_prediction(row):
     except (KeyError, TypeError, ValueError):
         parsed["parse_success"] = False
     return parsed
-
