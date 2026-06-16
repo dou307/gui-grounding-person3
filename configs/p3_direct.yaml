@@ -1,0 +1,14 @@
+experiment_id: P3-1
+name: direct_point
+method: direct
+description: "Directly predict click coordinates."
+output_schema:
+  action: click
+  x: int_0_1000
+  y: int_0_1000
+train_data: "${PROJECT_ROOT}/data/person3/p3_direct_train.json"
+val_data: "${PROJECT_ROOT}/data/person3/p3_direct_val.json"
+output_dir: "${PROJECT_ROOT}/checkpoints/person3/p3_direct"
+prediction_path: "${PROJECT_ROOT}/outputs/predictions/person3/p3_direct_val.jsonl"
+metrics_path: "${PROJECT_ROOT}/outputs/metrics/person3/p3_direct_val_metrics.json"
+

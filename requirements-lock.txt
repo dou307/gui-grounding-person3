@@ -1,0 +1,12 @@
+accelerate==1.7.0
+datasets==5.0.0
+peft==0.17.1
+pillow==12.2.0
+PyYAML==6.0.3
+qwen-vl-utils==0.0.14
+scipy==1.15.3
+sentencepiece==0.2.1
+torch @ https://mirrors.aliyun.com/pytorch-wheels/cu118/torch-2.6.0%2Bcu118-cp310-cp310-linux_x86_64.whl#sha256=715d3b039a629881f263c40d1fb65edac6786da13bfba221b353ef2371c4da86
+torchvision @ https://mirrors.aliyun.com/pytorch-wheels/cu118/torchvision-0.21.0%2Bcu118-cp310-cp310-linux_x86_64.whl#sha256=aae1fd398fb97a099bd3bd619a85e923c2191d348b90786514c8f81541afd010
+transformers==4.57.0
+
