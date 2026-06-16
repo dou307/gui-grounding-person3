@@ -236,12 +236,13 @@ def train(args):
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     Path(args.logging_dir).mkdir(parents=True, exist_ok=True)
 
-    processor = load_processor(args.model, args.min_pixels, args.max_pixels)
-    model = build_model(args)
     dataset = QwenGuiDataset(args.train_file, image_root=args.image_root, limit=args.limit)
     if len(dataset) == 0:
         raise ValueError(f"No training samples loaded from {args.train_file}")
     check_images(dataset, args.check_image_limit)
+
+    processor = load_processor(args.model, args.min_pixels, args.max_pixels)
+    model = build_model(args)
 
     training_args = TrainingArguments(
         output_dir=args.output_dir,
