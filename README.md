@@ -105,17 +105,38 @@ python -m src.person3.derive_person3_from_qwen \
 
 ## 训练
 
-本目录负责生成训练数据和评测代码；具体 LoRA 训练命令使用全组统一的 Qwen3-VL 微调脚本。
-
-训练时分别传入：
+本仓库提供独立 LoRA 训练入口：
 
 ```text
-p3_direct_train.jsonl
-p3_region_point_train.jsonl
-p3_target_region_point_train.jsonl
+src/person3/train_lora_qwen3vl.py
 ```
 
-建议输出目录：
+默认配置按单卡 V100 32GB 保守设置：FP16、SDPA、LoRA rank 16、batch size 1、gradient accumulation 16、1 epoch。
+
+先设置环境变量：
+
+```bash
+cd /home/ma-user/work/gui-project/person3
+export PROJECT_ROOT=/home/ma-user/work/gui-project
+export MODEL_DIR=$PROJECT_ROOT/models/Qwen3-VL-4B-Instruct
+conda activate qwen3vl
+```
+
+先用少量样本检查训练链路：
+
+```bash
+bash scripts/train_p3_direct_lora.sh --limit 8 --max-steps 2 --save-steps 2
+```
+
+正式训练三组实验：
+
+```bash
+bash scripts/train_all_person3_lora.sh
+```
+
+如果需要单独重跑某一组，也可以分别执行 `scripts/train_p3_direct_lora.sh`、`scripts/train_p3_region_point_lora.sh`、`scripts/train_p3_target_region_point_lora.sh`。
+
+输出目录：
 
 ```text
 $PROJECT_ROOT/checkpoints/person3/p3_direct
@@ -123,7 +144,21 @@ $PROJECT_ROOT/checkpoints/person3/p3_region_point
 $PROJECT_ROOT/checkpoints/person3/p3_target_region_point
 ```
 
-训练配置必须继承公共基线，只改变输出格式和训练数据。
+训练日志：
+
+```text
+$PROJECT_ROOT/outputs/logs/person3/p3_direct
+$PROJECT_ROOT/outputs/logs/person3/p3_region_point
+$PROJECT_ROOT/outputs/logs/person3/p3_target_region_point
+```
+
+如显存不足，降低图像 token 或增大梯度累积：
+
+```bash
+bash scripts/train_p3_direct_lora.sh \
+  --max-pixels 401408 \
+  --gradient-accumulation-steps 32
+```
 
 ## 评测
 

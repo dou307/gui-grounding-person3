@@ -185,7 +185,13 @@ python -m src.person3.build_qwen_data \
 
 ## 5. LoRA 训练
 
-训练脚本使用全组统一的 Qwen3-VL 微调入口。第三成员需要分别训练：
+当前仓库已经提供第三成员独立 LoRA 训练入口：
+
+```bash
+python -m src.person3.train_lora_qwen3vl
+```
+
+第三成员需要分别训练：
 
 ```text
 P3-1: p3_direct_train.jsonl
@@ -208,6 +214,25 @@ $PROJECT_ROOT/checkpoints/person3/p3_target_region_point
 - 不使用 BF16。
 - 不使用 FlashAttention 2。
 - 训练日志保存到 `outputs/logs/person3/`。
+
+先用 8 条样本跑通链路：
+
+```bash
+cd /home/ma-user/work/gui-project/person3
+export PROJECT_ROOT=/home/ma-user/work/gui-project
+export MODEL_DIR=$PROJECT_ROOT/models/Qwen3-VL-4B-Instruct
+conda activate qwen3vl
+
+bash scripts/train_p3_direct_lora.sh --limit 8 --max-steps 2 --save-steps 2
+```
+
+正式训练：
+
+```bash
+bash scripts/train_all_person3_lora.sh
+```
+
+如需单独重跑某一组，分别执行 `scripts/train_p3_direct_lora.sh`、`scripts/train_p3_region_point_lora.sh`、`scripts/train_p3_target_region_point_lora.sh`。
 
 ## 6. 推理
 
