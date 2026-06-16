@@ -55,9 +55,22 @@ def resolve_image_path(sample, input_path):
         Path(input_path).parent / image,
         Path.cwd() / image,
     ]
+    image_root = os.environ.get("IMAGE_ROOT")
+    if image_root:
+        candidates.append(Path(image_root) / image)
     project_root = os.environ.get("PROJECT_ROOT")
     if project_root:
-        candidates.append(Path(project_root) / image)
+        candidates.extend(
+            [
+                Path(project_root) / image,
+                Path(project_root) / "person3" / image,
+                Path(project_root) / "data" / "images" / image,
+                Path(project_root) / "data" / "splits" / image,
+                Path(project_root) / "data" / "rico_imgs" / "combined" / image,
+                Path(project_root) / "person3" / "data" / "images" / image,
+                Path(project_root) / "person3" / "data" / "splits" / image,
+            ]
+        )
     for candidate in candidates:
         if candidate.exists():
             return candidate
