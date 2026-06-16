@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_NAME="${ENV_NAME:-qwen3vl}"
+QWEN_ENV_NAME="${QWEN_ENV_NAME:-qwen3vl}"
 
 if ! command -v conda >/dev/null 2>&1; then
   echo "conda is required but not found." >&2
   exit 1
 fi
 
-if conda env list | awk '{print $1}' | grep -qx "${ENV_NAME}"; then
-  echo "Conda env ${ENV_NAME} already exists."
+if conda env list | awk '{print $1}' | grep -qx "${QWEN_ENV_NAME}"; then
+  echo "Conda env ${QWEN_ENV_NAME} already exists."
 else
-  conda create -n "${ENV_NAME}" python=3.10 -y
+  conda create -n "${QWEN_ENV_NAME}" python=3.10 -y
 fi
 
 set +u
 source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "${QWEN_ENV_NAME}"
 set -u
-conda activate "${ENV_NAME}"
 
 python -m pip install --upgrade pip
 
@@ -43,4 +43,3 @@ print("CUDA available:", torch.cuda.is_available())
 if torch.cuda.is_available():
     print("GPU:", torch.cuda.get_device_name(0))
 PY
-
