@@ -162,6 +162,22 @@ bash scripts/train_p3_direct_lora.sh \
 
 ## 评测
 
+验证集推理时建议使用批量推理，提高 GPU 利用率：
+
+```bash
+python -m src.person3.infer_qwen3vl \
+  --model $MODEL_DIR \
+  --adapter $PROJECT_ROOT/checkpoints/person3/p3_direct \
+  --input $PROJECT_ROOT/data/splits/D1-Base_val.jsonl \
+  --method direct \
+  --output $PROJECT_ROOT/outputs/predictions/person3/p3_direct_val.jsonl \
+  --batch-size 4 \
+  --max-new-tokens 64 \
+  --max-pixels 401408
+```
+
+如果显存允许，可以把 `--batch-size 4` 提高到 `8`；如显存不足则降回 `1` 或 `2`。
+
 预测文件使用 JSONL，每行推荐保存：
 
 ```json
