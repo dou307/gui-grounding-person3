@@ -29,7 +29,7 @@
   "point_1000": [947, 69],
   "platform": "web",
   "target_type": "icon",
-  "source": "seeclick"
+  "source": "widget_captioning"
 }
 ```
 
@@ -175,4 +175,3 @@ python -m src.person3.visualize_cases \
 2. Region -> Point 增加了可解释中间变量，可以区分“区域判断错误”和“精确坐标错误”。
 3. Target -> Region -> Point 进一步显式建模目标语义，重点观察它对相似控件、图标控件的提升。
 4. 如果两阶段方法总准确率不升反降，也要分析是否是输出更长导致解析失败、训练目标更复杂或区域标签噪声带来的影响。
-

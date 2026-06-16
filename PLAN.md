@@ -6,8 +6,8 @@
 
 | 类型 | 数据源 | 用途 | 文件名 |
 |---|---|---|---|
-| 训练集 | SeeClick GUI grounding 数据 | LoRA 训练 | `train_base_v1.jsonl` |
-| 验证集 | SeeClick 中固定划分 10% | 方法选择和消融对比 | `val_base_v1.jsonl` |
+| 训练集 | Widget Captioning，来自 OS-Atlas-data 仓库 | LoRA 训练 | `train_base_v1.jsonl` |
+| 验证集 | 从 Widget Captioning 公共训练数据中固定划分 | 方法选择和消融对比 | `val_base_v1.jsonl` |
 | 测试集 | ScreenSpot test split | 最终统一测试 | `screenspot_test.jsonl` |
 
 规则：
@@ -16,6 +16,14 @@
 - RICO 第一阶段不加入公共基线，避免额外转换和数据噪声。
 - 所有 bbox 和 point 统一为 `[0,1000]` 坐标。
 - 第三成员的所有实验必须与公共 `Direct Point` 基线比较。
+
+当前 1 号已统一的数据版本：
+
+| 版本 | 样本数 | 说明 |
+|---|---:|---|
+| D1-Base | 101,425 | 原始 Widget Captioning 数据，未做任何平衡 |
+| D1-Balanced | 86,412 | 按 Small/Medium/Large 目标大小重采样，每类 28,804 条 |
+| D1-Hard | 115,216 | 在 Balanced 基础上，对小目标过采样 2 倍 |
 
 ## 1. 第三成员研究问题
 
@@ -77,9 +85,9 @@ PY
 
 ## 3. 公共数据准备
 
-### 3.1 转换 SeeClick 标注
+### 3.1 转换 Widget Captioning 标注
 
-SeeClick 数据每条样本通常包含：
+Widget Captioning 数据来自 OS-Atlas-data 仓库。根据 1 号同步的信息，每条样本包含：
 
 ```json
 {
@@ -89,7 +97,7 @@ SeeClick 数据每条样本通常包含：
 }
 ```
 
-其中 bbox 是 `[0,1]` 相对坐标。
+其中 bbox 是归一化边界框坐标。具体原始字段名以 1 号导出的标注文件为准；转换脚本已兼容 `img_filename/image/file_name`、`instruction`、`bbox` 这类常见字段。
 
 转换命令示例：
 
@@ -97,18 +105,17 @@ SeeClick 数据每条样本通常包含：
 export PROJECT_ROOT=/home/ma-user/work/gui-project
 cd $PROJECT_ROOT/person3
 
-python -m src.person3.convert_seeclick \
-  --annotations $PROJECT_ROOT/raw/seeclick/annotations.json \
-  --image-root $PROJECT_ROOT/raw/seeclick/images \
-  --output $PROJECT_ROOT/data/splits/seeclick_all.jsonl \
-  --source seeclick
+python -m src.person3.convert_widget_captioning \
+  --annotations $PROJECT_ROOT/raw/widget_captioning/annotations.json \
+  --image-root $PROJECT_ROOT/raw/widget_captioning/images \
+  --output $PROJECT_ROOT/data/splits/widget_captioning_all.jsonl
 ```
 
 ### 3.2 划分训练集和验证集
 
 ```bash
 python -m src.person3.split_jsonl \
-  --input $PROJECT_ROOT/data/splits/seeclick_all.jsonl \
+  --input $PROJECT_ROOT/data/splits/widget_captioning_all.jsonl \
   --train-output $PROJECT_ROOT/data/splits/train_base_v1.jsonl \
   --val-output $PROJECT_ROOT/data/splits/val_base_v1.jsonl \
   --val-ratio 0.1 \
