@@ -58,7 +58,10 @@ def load_processor(model_id, min_pixels=None, max_pixels=None):
         kwargs["min_pixels"] = min_pixels
     if max_pixels is not None:
         kwargs["max_pixels"] = max_pixels
-    return AutoProcessor.from_pretrained(model_id, **kwargs)
+    processor = AutoProcessor.from_pretrained(model_id, **kwargs)
+    if getattr(processor, "tokenizer", None) is not None:
+        processor.tokenizer.padding_side = "left"
+    return processor
 
 
 def infer_batch(processor, model, samples, input_path, method, args):
