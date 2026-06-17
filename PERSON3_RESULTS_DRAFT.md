@@ -114,3 +114,38 @@ P3-1 如需复跑：
 ```bash
 bash scripts/eval_person3_method.sh direct
 ```
+
+## 三组完成后的汇总与打包
+
+三组训练、验证和 ScreenSpot 测试都完成后，生成总表：
+
+```bash
+$PY -m src.person3.summarize_results \
+  --metrics-dir "$PROJECT_ROOT/outputs/metrics/person3" \
+  --out-md "$PROJECT_ROOT/outputs/metrics/person3/person3_results_summary.md" \
+  --out-csv "$PROJECT_ROOT/outputs/metrics/person3/person3_results_summary.csv"
+```
+
+生成三组预测对比案例：
+
+```bash
+$PY -m src.person3.compare_predictions \
+  --truth "$PROJECT_ROOT/data/person3/D1-Base_val_1000.jsonl" \
+  --pred-dir "$PROJECT_ROOT/outputs/predictions/person3" \
+  --split val_1000 \
+  --out-dir "$PROJECT_ROOT/outputs/analysis/person3"
+
+$PY -m src.person3.compare_predictions \
+  --truth "$PROJECT_ROOT/data/splits/screenspot_eval.jsonl" \
+  --pred-dir "$PROJECT_ROOT/outputs/predictions/person3" \
+  --split screenspot \
+  --out-dir "$PROJECT_ROOT/outputs/analysis/person3"
+```
+
+最终打包：
+
+```bash
+bash scripts/package_person3_results.sh
+```
+
+如果云端文件浏览器仍有 100MB 下载限制，继续用 `split -b 90M` 分片下载。

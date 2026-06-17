@@ -554,3 +554,43 @@ PY
 ```
 
 如果 `$PY` 检查通过，继续 P3-1 1000 条验证或 ScreenSpot 测试。
+
+## 13. 后置自动化脚本
+
+P3-2 或 P3-3 训练完成后，一键跑验证、测试、评测和可视化：
+
+```bash
+bash scripts/eval_person3_method.sh region_point
+bash scripts/eval_person3_method.sh target_region_point
+```
+
+三组结果都完成后生成汇总表：
+
+```bash
+$PY -m src.person3.summarize_results \
+  --metrics-dir "$PROJECT_ROOT/outputs/metrics/person3" \
+  --out-md "$PROJECT_ROOT/outputs/metrics/person3/person3_results_summary.md" \
+  --out-csv "$PROJECT_ROOT/outputs/metrics/person3/person3_results_summary.csv"
+```
+
+三组预测都完成后生成对比案例：
+
+```bash
+$PY -m src.person3.compare_predictions \
+  --truth "$PROJECT_ROOT/data/person3/D1-Base_val_1000.jsonl" \
+  --pred-dir "$PROJECT_ROOT/outputs/predictions/person3" \
+  --split val_1000 \
+  --out-dir "$PROJECT_ROOT/outputs/analysis/person3"
+
+$PY -m src.person3.compare_predictions \
+  --truth "$PROJECT_ROOT/data/splits/screenspot_eval.jsonl" \
+  --pred-dir "$PROJECT_ROOT/outputs/predictions/person3" \
+  --split screenspot \
+  --out-dir "$PROJECT_ROOT/outputs/analysis/person3"
+```
+
+最终交付打包：
+
+```bash
+bash scripts/package_person3_results.sh
+```
