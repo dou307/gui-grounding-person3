@@ -13,6 +13,9 @@ logs/
 *.jsonl
 !examples/*.jsonl
 *.log
+*.tar.gz
+*.tar.gz.part_*
+_artifacts/
 
 .env
 .venv/
