@@ -43,7 +43,9 @@ if ! env_exists; then
   conda create -n "${QWEN_ENV_NAME}" "python=${QWEN_PYTHON_VERSION}" -y
 fi
 
+set +u
 conda activate "${QWEN_ENV_NAME}"
+set -u
 
 PY_VERSION="$(python - <<'PY'
 import sys
