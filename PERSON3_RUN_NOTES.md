@@ -594,3 +594,40 @@ $PY -m src.person3.compare_predictions \
 ```bash
 bash scripts/package_person3_results.sh
 ```
+
+## 14. 已知 ScreenSpot 结果
+
+P3-1 Direct Point:
+
+```text
+total = 881
+parse_success_rate = 1.0000
+click_accuracy = 0.4472
+```
+
+P3-2 Region -> Point:
+
+```text
+total = 881
+parse_success_rate = 1.0000
+click_accuracy = 0.4472
+region_accuracy = 0.5108
+region_wrong_count = 431
+precision_wrong_count = 178
+```
+
+P3-3 Target -> Region -> Point:
+
+```text
+total = 881
+parsed = 880
+parse_success_rate = 0.9989
+click_accuracy = 0.4291
+click_accuracy_on_parsed = 0.4295
+region_accuracy = 0.5000
+region_wrong_count = 440
+precision_wrong_count = 183
+mean_center_distance = 183.7717
+```
+
+当前 ScreenSpot 初步结论：P3-2 与 P3-1 的最终点击准确率持平，但提供 region 错误分解；P3-3 加入 target 后准确率下降到 0.4291，说明更复杂的结构化输出未必带来收益。

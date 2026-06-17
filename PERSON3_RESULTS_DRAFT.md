@@ -33,7 +33,7 @@
 |---|---:|---:|---:|---:|---:|---:|
 | P3-1 Direct Point | 1000 | 0.7580 | 1.0000 | 881 | 0.4472 | 1.0000 |
 | P3-2 Region -> Point | 待补 | 待补 | 待补 | 待补 | 待补 | 待补 |
-| P3-3 Target -> Region -> Point | 待补 | 待补 | 待补 | 待补 | 待补 | 待补 |
+| P3-3 Target -> Region -> Point | 待补 | 待补 | 待补 | 881 | 0.4291 | 0.9989 |
 
 ## P3-1 详细结果
 
@@ -114,6 +114,47 @@ P3-1 如需复跑：
 ```bash
 bash scripts/eval_person3_method.sh direct
 ```
+
+## 已补充的 P3-3 ScreenSpot 结果
+
+P3-3 Target -> Region -> Point 的 ScreenSpot 测试已完成：
+
+| 指标 | 数值 |
+|---|---:|
+| total | 881 |
+| parsed | 880 |
+| parse_success_rate | 0.9989 |
+| click_accuracy | 0.4291 |
+| click_accuracy_on_parsed | 0.4295 |
+| region_accuracy | 0.5000 |
+| region_wrong_count | 440 |
+| precision_wrong_count | 183 |
+| mean_center_distance | 183.7717 |
+
+按平台：
+
+| platform | total | correct | accuracy |
+|---|---:|---:|---:|
+| desktop | 282 | 2 | 0.0071 |
+| mobile | 162 | 2 | 0.0123 |
+| web | 436 | 374 | 0.8578 |
+
+按目标类型：
+
+| target_type | total | correct | accuracy |
+|---|---:|---:|---:|
+| icon | 412 | 176 | 0.4272 |
+| text | 468 | 202 | 0.4316 |
+
+当前 ScreenSpot 对比：
+
+| 方法 | Click Acc | Parse | Region Acc |
+|---|---:|---:|---:|
+| P3-1 Direct Point | 0.4472 | 1.0000 | NA |
+| P3-2 Region -> Point | 0.4472 | 1.0000 | 0.5108 |
+| P3-3 Target -> Region -> Point | 0.4291 | 0.9989 | 0.5000 |
+
+初步观察：P3-3 在 ScreenSpot 上低于 P3-1/P3-2，说明额外输出 `target` 字段没有带来最终点击准确率提升，反而可能因为输出更长和任务更复杂带来轻微解析失败与定位下降。
 
 ## 三组完成后的汇总与打包
 
