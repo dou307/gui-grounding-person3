@@ -2,6 +2,7 @@
 set -euo pipefail
 
 QWEN_ENV_NAME="${QWEN_ENV_NAME:-qwen3vl}"
+QWEN_PYTHON_VERSION="${QWEN_PYTHON_VERSION:-3.10.20}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_ROOT="${PROJECT_ROOT:-$(cd "${REPO_ROOT}/.." && pwd)}"
@@ -13,16 +14,36 @@ if ! command -v conda >/dev/null 2>&1; then
   exit 1
 fi
 
-if conda env list | awk '{print $1}' | grep -qx "${QWEN_ENV_NAME}"; then
-  echo "Conda env ${QWEN_ENV_NAME} already exists."
-else
-  conda create -n "${QWEN_ENV_NAME}" python=3.10 -y
-fi
-
 set +u
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate "${QWEN_ENV_NAME}"
 set -u
+
+env_exists() {
+  conda env list | awk '{print $1}' | grep -qx "${QWEN_ENV_NAME}"
+}
+
+env_python_version() {
+  conda run -n "${QWEN_ENV_NAME}" python - <<'PY'
+import sys
+print(f"{sys.version_info.major}.{sys.version_info.minor}")
+PY
+}
+
+if env_exists; then
+  EXISTING_PY_VERSION="$(env_python_version || true)"
+  if [[ "${EXISTING_PY_VERSION}" == "3.10" ]]; then
+    echo "Conda env ${QWEN_ENV_NAME} already exists with Python ${EXISTING_PY_VERSION}."
+  else
+    echo "Removing broken ${QWEN_ENV_NAME} env: expected Python 3.10, got ${EXISTING_PY_VERSION:-unknown}."
+    conda env remove -n "${QWEN_ENV_NAME}" -y
+  fi
+fi
+
+if ! env_exists; then
+  conda create -n "${QWEN_ENV_NAME}" "python=${QWEN_PYTHON_VERSION}" -y
+fi
+
+conda activate "${QWEN_ENV_NAME}"
 
 PY_VERSION="$(python - <<'PY'
 import sys
@@ -32,7 +53,7 @@ PY
 
 if [[ "${PY_VERSION}" != "3.10" ]]; then
   echo "Expected Python 3.10 in ${QWEN_ENV_NAME}, but got Python ${PY_VERSION}." >&2
-  echo "Run: conda env remove -n ${QWEN_ENV_NAME} -y && bash scripts/install_env.sh" >&2
+  echo "Run: conda env remove -n ${QWEN_ENV_NAME} -y && QWEN_PYTHON_VERSION=${QWEN_PYTHON_VERSION} bash scripts/install_env.sh" >&2
   exit 1
 fi
 
