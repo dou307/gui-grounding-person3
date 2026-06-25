@@ -23,7 +23,7 @@ for name in b0_screenspot b1_screenspot final_c2f_retry_screenspot; do
   fi
 done
 
-"${PY}" -m src.person3.summarize_final_results \
+"${PY}" -m src.final_experiments.summarize_final_results \
   --metrics-dir "${METRIC_DIR}" \
   --out-md "${METRIC_DIR}/final_results_summary.md" \
   --out-csv "${METRIC_DIR}/final_results_summary.csv"

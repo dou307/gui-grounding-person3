@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from .schema import read_jsonl, resolve_image_path
+from src.person3.schema import read_jsonl, resolve_image_path
 
 
 def main():

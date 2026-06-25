@@ -11,7 +11,7 @@ OUTPUT="${OUTPUT:-${PROJECT_ROOT}/outputs/predictions/final/final_c2f_retry_scre
 
 cd "${REPO_DIR}"
 
-"${PY}" -m src.person3.infer_final_qwen3vl \
+"${PY}" -m src.final_experiments.infer_final_qwen3vl \
   --model "${MODEL_DIR}" \
   --adapter "${ADAPTER}" \
   --input "${TEST_FILE}" \

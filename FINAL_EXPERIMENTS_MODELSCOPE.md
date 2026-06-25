@@ -53,7 +53,7 @@ git clone https://github.com/Byting-HYQ/gui-grounding person5
 $PROJECT_ROOT/team_repos/person4-code
 ```
 
-当前最终脚本已经把 4 号 Coarse-to-Fine 和 5 号 Retry 的核心逻辑迁移进 `src/person3/infer_final_qwen3vl.py`，所以正式跑 Final 不需要直接调用 4 号或 5 号原脚本。
+当前最终脚本已经把 4 号 Coarse-to-Fine 和 5 号 Retry 的核心逻辑迁移进 `src/final_experiments/infer_final_qwen3vl.py`，所以正式跑 Final 不需要直接调用 4 号或 5 号原脚本。
 
 ## 3. 环境安装
 
@@ -105,7 +105,7 @@ $PROJECT_ROOT/models/Qwen3-VL-4B-Instruct
 
 ```bash
 cd "$REPO_DIR"
-bash scripts/prepare_final_data.sh
+bash scripts/final/prepare_final_data.sh
 ```
 
 会生成：
@@ -144,7 +144,7 @@ export IMAGE_ROOT=$SCREENSPOT_IMAGE_ROOT
 cd "$REPO_DIR"
 export IMAGE_ROOT=$PROJECT_ROOT/data/rico_imgs/combined
 export SCREENSPOT_IMAGE_ROOT=$PROJECT_ROOT/data/screenspot_hf/images
-bash scripts/check_final_data_images.sh
+bash scripts/final/check_final_data_images.sh
 ```
 
 ## 5. 训练 B1
@@ -154,7 +154,7 @@ cd "$REPO_DIR"
 
 export IMAGE_ROOT=$PROJECT_ROOT/data/rico_imgs/combined
 
-bash scripts/train_final_b1_lora.sh \
+bash scripts/final/train_final_b1_lora.sh \
   --check-image-limit 20
 ```
 
@@ -170,7 +170,7 @@ MAX_PIXELS=401408
 如需改训练步数：
 
 ```bash
-MAX_STEPS=625 SAVE_STEPS=250 bash scripts/train_final_b1_lora.sh
+MAX_STEPS=625 SAVE_STEPS=250 bash scripts/final/train_final_b1_lora.sh
 ```
 
 输出：
@@ -191,7 +191,7 @@ export IMAGE_ROOT=$PROJECT_ROOT/data/screenspot_hf/images
 
 ```bash
 cd "$REPO_DIR"
-bash scripts/infer_final_b0.sh
+bash scripts/final/infer_final_b0.sh
 ```
 
 输出：
@@ -204,7 +204,7 @@ $PROJECT_ROOT/outputs/predictions/final/b0_screenspot.jsonl
 
 ```bash
 cd "$REPO_DIR"
-bash scripts/infer_final_b1.sh
+bash scripts/final/infer_final_b1.sh
 ```
 
 输出：
@@ -217,7 +217,7 @@ $PROJECT_ROOT/outputs/predictions/final/b1_screenspot.jsonl
 
 ```bash
 cd "$REPO_DIR"
-bash scripts/infer_final_full.sh
+bash scripts/final/infer_final_full.sh
 ```
 
 输出：
@@ -236,20 +236,20 @@ MAX_RETRIES=1
 调试时建议先跑小样本：
 
 ```bash
-bash scripts/infer_final_full.sh --limit 20
+bash scripts/final/infer_final_full.sh --limit 20
 ```
 
 如果耗时太长，可以降低重试成本：
 
 ```bash
-RETRY_SAMPLES=2 MAX_RETRIES=0 bash scripts/infer_final_full.sh
+RETRY_SAMPLES=2 MAX_RETRIES=0 bash scripts/final/infer_final_full.sh
 ```
 
 ## 7. 评测和汇总
 
 ```bash
 cd "$REPO_DIR"
-bash scripts/evaluate_final_experiments.sh
+bash scripts/final/evaluate_final_experiments.sh
 ```
 
 输出：

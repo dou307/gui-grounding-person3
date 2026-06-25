@@ -12,7 +12,7 @@ try:
 except ImportError:
     PeftModel = None
 
-from .schema import extract_json_object, prompt_for_method, read_jsonl, resolve_image_path
+from src.person3.schema import extract_json_object, prompt_for_method, read_jsonl, resolve_image_path
 
 
 def clamp_1000(value):

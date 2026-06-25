@@ -2,7 +2,7 @@
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
-  echo "Usage: bash scripts/eval_person3_method.sh <direct|region_point|target_region_point>" >&2
+  echo "Usage: bash scripts/person3/eval_person3_method.sh <direct|region_point|target_region_point>" >&2
   exit 1
 fi
 

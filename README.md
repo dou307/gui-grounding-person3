@@ -45,16 +45,20 @@ gui-grounding-person3/
 │   ├── p3_region_point.yaml
 │   └── p3_target_region_point.yaml
 ├── src/
-│   └── person3/
-│       ├── __init__.py
-│       ├── build_qwen_data.py
-│       ├── evaluate.py
-│       ├── region.py
-│       ├── schema.py
-│       └── visualize_cases.py
+│   ├── person3/              # 3号个人实验：Direct / Region / Target
+│   └── final_experiments/    # 最终组合实验：B0 / B1 / Final
 └── scripts/
-    └── run_person3_data_eval_demo.sh
+    ├── person3/              # 3号个人实验脚本
+    ├── final/                # 最终组合实验脚本
+    ├── install_env.sh
+    └── cache_wheels.sh
 ```
+
+个人 3 号实验和最终组合实验已分开：
+
+- `src/person3/`、`scripts/person3/`：成员 3 单人实验。
+- `src/final_experiments/`、`scripts/final/`：五人最终组合实验。
+- `FINAL_EXPERIMENTS_MODELSCOPE.md`：最终组合实验在 ModelScope 上的完整运行说明。
 
 ## 在 ModelArts 上放置位置
 
@@ -125,16 +129,16 @@ conda activate qwen3vl
 先用少量样本检查训练链路：
 
 ```bash
-bash scripts/train_p3_direct_lora.sh --limit 8 --max-steps 2 --save-steps 2
+bash scripts/person3/train_p3_direct_lora.sh --limit 8 --max-steps 2 --save-steps 2
 ```
 
 正式训练三组实验：
 
 ```bash
-bash scripts/train_all_person3_lora.sh
+bash scripts/person3/train_all_person3_lora.sh
 ```
 
-如果需要单独重跑某一组，也可以分别执行 `scripts/train_p3_direct_lora.sh`、`scripts/train_p3_region_point_lora.sh`、`scripts/train_p3_target_region_point_lora.sh`。
+如果需要单独重跑某一组，也可以分别执行 `scripts/person3/train_p3_direct_lora.sh`、`scripts/person3/train_p3_region_point_lora.sh`、`scripts/person3/train_p3_target_region_point_lora.sh`。
 
 输出目录：
 
@@ -155,9 +159,32 @@ $PROJECT_ROOT/outputs/logs/person3/p3_target_region_point
 如显存不足，降低图像 token 或增大梯度累积：
 
 ```bash
-bash scripts/train_p3_direct_lora.sh \
+bash scripts/person3/train_p3_direct_lora.sh \
   --max-pixels 401408 \
   --gradient-accumulation-steps 32
+```
+
+## 最终组合实验
+
+最终组合实验代码与个人 3 号实验分开维护，入口为：
+
+```text
+src/final_experiments/
+scripts/final/
+```
+
+三组最终实验：
+
+| 实验 | 说明 |
+|---|---|
+| B0 | 原始 Qwen3-VL 零样本 |
+| B1 | D1-Hard + Point LoRA |
+| Final | B1 + Coarse-to-Fine + Retry |
+
+在 ModelScope 上的完整流程见：
+
+```text
+FINAL_EXPERIMENTS_MODELSCOPE.md
 ```
 
 ## 评测
